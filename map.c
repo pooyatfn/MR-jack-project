@@ -18,21 +18,22 @@ typedef struct map_t {
 
 void insert_map(int row, int column, map map_info[row][column]);
 
-void load_map();
+void initialize_game();
 
 void set_color(int row, int column, int x, int y, map map_info[row][column]);
 
-void load_map() {
+void initialize_game() {
     FILE *fp, *cfp;
-    printf("\t1-PLAY NEW GAME\n\t2- LOAD GAME\n\t3-CUSTOMIZE MAP\n");
     int menu, row = 9, column = 13;
+    label :
+    printf("\n\t1- PLAY NEW GAME\n\t2- LOAD GAME\n\t3- CUSTOMIZE MAP\n\t4- BACK TO MAIN MENU\n");
     scanf("%d", &menu);
     switch (menu) {
         case 1: {
             fp = fopen("default_map.txt", "r");
             if (!fp) {
-                printf("cant open default_map!");
-                exit(-1);
+                printf("CAN'T OPEN default_map!");
+                goto label;
             }
             map map_info[row][column];
             fscanf(fp, "%*[^\n]%*c");
@@ -69,7 +70,7 @@ void load_map() {
             scanf("%*c%*c");
             cfp = fopen("custom_map.txt", "r");
             if (!cfp) {
-                printf("cant open custom_map !");
+                printf("CAN'T OPEN custom_map!");
                 exit(-1);
             }
             map map_info[row][column];
@@ -84,10 +85,14 @@ void load_map() {
             insert_map(row, column, map_info);
             break;
         }
+        case 4:
+            goto end;
         default:
-            printf("wrong input!");
-            exit(-1);
+            printf("WRONG INPUT! TRY AGAIN\n");
+            goto label;
     }
+    end :
+    return;
 }
 
 void insert_map(int row, int column, map map_info[row][column]) {
@@ -128,14 +133,12 @@ void insert_map(int row, int column, map map_info[row][column]) {
             }
             if (i % 4 == 0) {
                 if (j % 2 == 0) {
-                    if (i == row * 4 && j == 0){
+                    if (i == row * 4 && j == 0) {
                         printf("      \\");
-                    }
-                    else {
-                        if (i != row * 4 || j != column - 1){
+                    } else {
+                        if (i != row * 4 || j != column - 1) {
                             printf("/     \\");
-                        }
-                        else {
+                        } else {
                             printf("/      ");
                         }
                     }
@@ -146,15 +149,13 @@ void insert_map(int row, int column, map map_info[row][column]) {
                 if (j % 2 == 0) {
                     if (i != 4 * row + 1 || j != 0) {
                         printf("/  ");
-                    }
-                    else {
+                    } else {
                         printf("   ");
                     }
                     set_color(row, column, x, y, map_info);
                     if (i != 4 * row + 1 || j != column - 1) {
                         printf("  \\");
-                    }
-                    else {
+                    } else {
                         printf("   ");
                     }
                 } else {
