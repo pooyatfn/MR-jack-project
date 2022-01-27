@@ -2,18 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-
-typedef struct coordinates_t {
-    int x;
-    int y;
-} coordinates;
-typedef struct character_t {
-    char name[3];
-    int move;
-    coordinates map_coordinates;
-    int is_suspect;
-    struct character_t *next;
-} character;
+#include "map.h"
 
 struct character_t *Create_node(FILE *fp);
 
@@ -23,8 +12,11 @@ void add_odd_even_node(character **first, character **second, character *head);
 
 void Add_node(struct character_t **head, FILE *fp);
 
-void delete_node(struct character_t **head, int index);
+void char_action(char name[3], int row, int column, map map_info[row][column]);
 
+void swap_map(int x1, int y1, int x2, int y2, int row, int column, map map_info[row][column]);
+
+void delete_node(struct character_t **head, int index);
 
 void shuffle_list(character *head);
 
@@ -34,40 +26,54 @@ void odd_even_round_characters(character *head, int turn);
 
 void char_info_print(char name[2]);
 
-int main() {
+void character_actions(int row, int column, int round, int turn, map map_info[row][column]);
+
+void character_actions(int row, int column, int round, int turn, map map_info[row][column]) {
     FILE *fp = fopen("action_characters.txt", "r");
+    if (fp == NULL) {
+        printf("CAN'T OPEN action_characters!");
+        exit(-1);
+    }
     character *head = NULL;
     for (int i = 0; i < 8; ++i) {
         Add_node(&head, fp);
     }
     fclose(fp);
-
     character *first = NULL;
     character *second = NULL;
-
     int char_num;
-    for (int i = 1; i <= 8; ++i) {
-        if (i % 2 != 0) {
+    for (; round <= 8; ++round) {
+        if (round % 2 != 0) {
             shuffle_list(head);
             add_odd_even_node(&first, &second, head);
         }
-        for (int j = 1; j <= 4; ++j) {
-            printf("Round %d. Turn %d. Choose a character :\n", i, j);
-            if (i % 2 != 0) {
-                odd_even_round_characters(first, j);
+        for (; turn <= 4; ++turn) {
+            insert_map(row, column, map_info);
+            printf("Round %d. Turn %d. Choose a character :\n", round, turn);
+            if (round % 2 != 0) {
+                odd_even_round_characters(first, turn);
             } else {
-                odd_even_round_characters(second, j);
+                odd_even_round_characters(second, turn);
             }
             scanf("%d", &char_num);
-            if (i % 2 != 0) {
+            if (round % 2 != 0) {
+                character *tmp = first;
+                for (int i = 1; i < char_num; ++i) {
+                    tmp = tmp->next;
+                }
+                char_action(tmp->name, row, column, map_info);
                 delete_node(&first, char_num - 1);
             } else {
+                character *tmp = second;
+                for (int i = 1; i < char_num; ++i) {
+                    tmp = tmp->next;
+                }
+                char_action(tmp->name, row, column, map_info);
                 delete_node(&second, char_num - 1);
             }
             printf("\n");
         }
     }
-    return 0;
 }
 
 struct character_t *Create_node(FILE *fp) {
@@ -194,4 +200,93 @@ void char_info_print(char name[2]) {
     } else if (!strcmp(name, "JB")) {
         printf("JB: 1) Move 1 to 3 houses. 2)  Opens a manhole and closes another\n");
     }
+}
+
+void char_action(char name[3], int row, int column, map map_info[row][column]) {
+    int x1, y1, x2, y2, opt, tmp = 0;
+    for (int i = 0; i < row; ++i) {
+        for (int j = 0; j < column; ++j) {
+            if (!strcmp(name, map_info[i][j].name)) {
+                x1 = i;
+                y1 = j;
+                break;
+            }
+        }
+    }
+    if (!strcmp(name, "SH")) {
+        printf("WHERE DO YOU WANT TO GO ? ENTER COORDINATES x y:\n");
+        scanf("%d%d", &x2, &y2);
+        swap_map(x1, y1, x2, y2, row, column, map_info);
+    } else if (!strcmp(name, "JW")) {
+        printf("WHERE DO YOU WANT TO GO ? ENTER COORDINATES x y:\n");
+        scanf("%d%d", &x2, &y2);
+        swap_map(x1, y1, x2, y2, row, column, map_info);
+    } else if (!strcmp(name, "JS")) {
+        printf("1- MOVE\n2- USE ABILITY\n");
+        scanf("%d", &opt);
+        switch (opt) {
+            case 1: {
+                printf("WHERE DO YOU WANT TO GO ? ENTER COORDINATES x y:\n");
+                scanf("%d%d", &x2, &y2);
+                swap_map(x1, y1, x2, y2, row, column, map_info);
+            }
+            case 2: {
+            }
+        }
+    } else if (!strcmp(name, "IL")) {
+        printf("WHERE DO YOU WANT TO GO ? ENTER COORDINATES x y:\n");
+        scanf("%d%d", &x2, &y2);
+        swap_map(x1, y1, x2, y2, row, column, map_info);
+    } else if (!strcmp(name, "MS")) {
+        printf("WHERE DO YOU WANT TO GO  ? (YOU CAN PASS OVER BUILDINGS) ENTER COORDINATES x y:\n");
+        scanf("%d%d", &x2, &y2);
+        swap_map(x1, y1, x2, y2, row, column, map_info);
+    } else if (!strcmp(name, "SG")) {
+        printf("1- MOVE\n2- USE ABILITY\n");
+        scanf("%d", &opt);
+        switch (opt) {
+            case 1: {
+                printf("WHERE DO YOU WANT TO GO ? ENTER COORDINATES x y:\n");
+                scanf("%d%d", &x2, &y2);
+                swap_map(x1, y1, x2, y2, row, column, map_info);
+            }
+            case 2: {
+            }
+        }
+    } else if (!strcmp(name, "WG")) {
+        printf("WHERE DO YOU WANT TO GO ? (YOU CAN CHANGE YOUR LOCATION WITH OTHER CHARACTER'S)\n");
+        scanf("%d%d", &x2, &y2);
+        swap_map(x1, y1, x2, y2, row, column, map_info);
+    } else {
+        printf("1- MOVE\n2- USE ABILITY\n");
+        scanf("%d", &opt);
+        switch (opt) {
+            case 1: {
+                printf("WHERE DO YOU WANT TO GO ? ENTER COORDINATES x y:\n");
+                scanf("%d%d", &x2, &y2);
+                swap_map(x1, y1, x2, y2, row, column, map_info);
+            }
+            case 2: {
+            }
+        }
+    }
+}
+
+void swap_map(int x1, int y1, int x2, int y2, int row, int column, map map_info[row][column]) {
+    map tmp;
+    strcpy(tmp.name, map_info[x1][y1].name);
+    tmp.info = map_info[x1][y1].info;
+    tmp.is_on = map_info[x1][y1].is_on;
+    tmp.second_info = map_info[x1][y1].second_info;
+    strcpy(tmp.second_name, map_info[x1][y1].second_name);
+    strcpy(map_info[x1][y1].name, map_info[x2][y2].name);
+    map_info[x1][y1].info = map_info[x2][y2].info;
+    map_info[x1][y1].second_info = map_info[x2][y2].second_info;
+    map_info[x1][y1].is_on = map_info[x2][y2].is_on;
+    strcpy(map_info[x1][y1].second_name, map_info[x2][y2].second_name);
+    strcpy(map_info[x2][y2].name, tmp.name);
+    strcpy(map_info[x2][y2].second_name, tmp.second_name);
+    map_info[x2][y2].is_on = tmp.is_on;
+    map_info[x2][y2].info = tmp.info;
+    map_info[x2][y2].second_info = tmp.second_info;
 }
