@@ -1,9 +1,9 @@
 #include <characters.h>
 
-void start_game(int row, int column, map map_info[row][column], game_info gameInfo) {
+void start_game(int row, int column, map map_info[row][column], game_info gameInfo, character *suspects) {
     int round = 0 + gameInfo.round;
     int turn = 0 + gameInfo.turn;
-    character_actions(row, column, map_info, gameInfo);
+    character_actions(row, column, map_info, gameInfo, suspects);
 }
 
 void initialize_game() {
@@ -37,8 +37,17 @@ void initialize_game() {
             gets(gameInfo.mr_jack_name);
             gameInfo.turn = 1;
             gameInfo.round = 1;
-
-            start_game(row, column, map_info, gameInfo);
+            fp = fopen("action_characters.txt", "r");
+            if (fp == NULL) {
+                printf("CAN'T OPEN action_characters!");
+                exit(-1);
+            }
+            character *suspects = NULL;
+            for (int i = 0; i < 8; ++i) {
+                Add_node(&suspects, fp);
+            }
+            fclose(fp);
+            start_game(row, column, map_info, gameInfo, suspects);
             break;
         }
         case 2: {
@@ -75,7 +84,26 @@ void initialize_game() {
                 }
             }
             fclose(cfp);
-            insert_map(row, column, map_info);
+            game_info gameInfo;
+            printf("ENTER FIRST PLAYER'S NAME,THE DETECTIVE:\n");
+            fflush(stdin);
+            gets(gameInfo.detective_name);
+            fflush(stdin);
+            printf("ENTER SECOND PLAYER'S NAME, MR JACK:\n");
+            gets(gameInfo.mr_jack_name);
+            gameInfo.turn = 1;
+            gameInfo.round = 1;
+            fp = fopen("action_characters.txt", "r");
+            if (fp == NULL) {
+                printf("CAN'T OPEN action_characters!");
+                exit(-1);
+            }
+            character *suspects = NULL;
+            for (int i = 0; i < 8; ++i) {
+                Add_node(&suspects, fp);
+            }
+            fclose(fp);
+            start_game(row,column,map_info,gameInfo,suspects);
             break;
         }
         case 4:

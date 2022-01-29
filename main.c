@@ -36,6 +36,9 @@ void main_menu() {
 }
 
 void about_us() {
-    printf("\n\tAMIRKABIR UNIVERSITY OF TECHNOLOGY FINAL PROJECT\n");
-    printf("FALL\n");
+    system("cls");
+    printf("\n\tAMIRKABIR UNIVERSITY OF TECHNOLOGY FINAL PROJECT\n\n");
+    printf("\tPROFESSOR : DOCTOR ZEYNALEE\n\n\tCREATOR : POOYA TOOFANIAN\n\n\tSTUDENT ID : 40031034\n\n\tWINTER 1400\n\n");
+    printf("ENTER ANY CHARACTER TO CONTINUE\n");
+    scanf("%*c%*c");
 }
