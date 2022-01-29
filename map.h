@@ -1,21 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <windows.h>
-
-
 void insert_map(int row, int column, map map_info[row][column]);
 
 void set_color(int row, int column, int x, int y, map map_info[row][column]);
 
 void insert_map(int row, int column, map map_info[row][column]) {
-    coordinates map_coordinates[row][column];
-    for (int i = 0; i < row; ++i) {
-        for (int j = 0; j < column; ++j) {
-            map_coordinates[i][j].x = j;
-            map_coordinates[i][j].y = i;
-        }
-    }
     printf("  ");
     for (int i = 0; i < column; ++i) {
         if (i % 2 == 0) {

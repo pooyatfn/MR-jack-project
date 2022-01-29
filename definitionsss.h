@@ -1,7 +1,8 @@
-typedef struct coordinates_t {
-    int x;
-    int y;
-} coordinates;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#include <time.h>
 
 typedef struct map_t {
     char name[3];
@@ -20,8 +21,5 @@ typedef struct game_info_t {
 
 typedef struct character_t {
     char name[3];
-    int move;
-    coordinates map_coordinates;
-    int is_suspect;
     struct character_t *next;
 } character;

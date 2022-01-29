@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
 #include "map.h"
 
 struct character_t *Create_node(FILE *fp);
@@ -26,9 +22,9 @@ void odd_even_round_characters(character *head, int turn);
 
 void char_info_print(char name[2]);
 
-void character_actions(int row, int column, int round, int turn, map map_info[row][column]);
+void character_actions(int row, int column, map map_info[row][column], game_info gameInfo);
 
-void character_actions(int row, int column, int round, int turn, map map_info[row][column]) {
+void character_actions(int row, int column, map map_info[row][column], game_info gameInfo) {
     FILE *fp = fopen("action_characters.txt", "r");
     if (fp == NULL) {
         printf("CAN'T OPEN action_characters!");
@@ -39,24 +35,38 @@ void character_actions(int row, int column, int round, int turn, map map_info[ro
         Add_node(&head, fp);
     }
     fclose(fp);
+
     character *first = NULL;
     character *second = NULL;
     int char_num;
-    for (; round <= 8; ++round) {
-        if (round % 2 != 0) {
+    for (; gameInfo.round <= 8; ++gameInfo.round) {
+        if (gameInfo.round % 2 != 0) {
             shuffle_list(head);
             add_odd_even_node(&first, &second, head);
         }
-        for (; turn <= 4; ++turn) {
+        for (gameInfo.turn = 1; gameInfo.turn <= 4; ++gameInfo.turn) {
             insert_map(row, column, map_info);
-            printf("Round %d. Turn %d. Choose a character :\n", round, turn);
-            if (round % 2 != 0) {
-                odd_even_round_characters(first, turn);
+            if (gameInfo.round % 2 == 1) {
+                if (gameInfo.turn == 1 || gameInfo.turn == 4) {
+                    printf("\nROUND %d. TURN %d. CHOOSE A CHARACTER %s:\n\n", gameInfo.round, gameInfo.turn,gameInfo.detective_name);
+                }
+                else {
+                    printf("\nROUND %d. TURN %d. CHOOSE A CHARACTER %s:\n\n", gameInfo.round, gameInfo.turn,gameInfo.mr_jack_name);
+                }
+            }
+            else if (gameInfo.turn == 1 || gameInfo.turn == 4){
+                printf("\nROUND %d. TURN %d. CHOOSE A CHARACTER %s:\n\n", gameInfo.round, gameInfo.turn,gameInfo.mr_jack_name);
+            }
+            else {
+                printf("\nROUND %d. TURN %d. CHOOSE A CHARACTER %s:\n\n", gameInfo.round, gameInfo.turn,gameInfo.detective_name);
+            }
+            if (gameInfo.round % 2 != 0) {
+                odd_even_round_characters(first, gameInfo.turn);
             } else {
-                odd_even_round_characters(second, turn);
+                odd_even_round_characters(second, gameInfo.turn);
             }
             scanf("%d", &char_num);
-            if (round % 2 != 0) {
+            if (gameInfo.round % 2 != 0) {
                 character *tmp = first;
                 for (int i = 1; i < char_num; ++i) {
                     tmp = tmp->next;
@@ -78,7 +88,7 @@ void character_actions(int row, int column, int round, int turn, map map_info[ro
 
 struct character_t *Create_node(FILE *fp) {
     struct character_t *new_node = (struct character_t *) malloc(sizeof(struct character_t));
-    fscanf(fp, "%s %d\n", new_node->name, &new_node->move);
+    fscanf(fp, "%s %*d\n", new_node->name);
     return new_node;
 }
 
@@ -100,10 +110,6 @@ void Add_node(struct character_t **head, FILE *fp) {
 struct character_t *create_odd_even_node(struct character_t *head) {
     struct character_t *new_node = (struct character_t *) malloc(sizeof(character));
     strcpy(new_node->name, head->name);
-    new_node->map_coordinates.y = head->map_coordinates.y;
-    new_node->map_coordinates.x = head->map_coordinates.x;
-    new_node->move = head->move;
-    new_node->is_suspect = head->is_suspect;
     return new_node;
 }
 
@@ -157,20 +163,8 @@ void swap_char_struct(character *head, int index) {
         seek = seek->next;
     }
     strcpy(tmp.name, seek->name);
-    tmp.move = seek->move;
-    tmp.map_coordinates.x = seek->map_coordinates.x;
-    tmp.map_coordinates.y = seek->map_coordinates.y;
-    tmp.is_suspect = seek->is_suspect;
     strcpy(seek->name, head->name);
-    seek->move = head->move;
-    seek->map_coordinates.x = head->map_coordinates.x;
-    seek->map_coordinates.y = head->map_coordinates.y;
-    seek->is_suspect = head->is_suspect;
     strcpy(head->name, tmp.name);
-    head->move = tmp.move;
-    head->map_coordinates.x = tmp.map_coordinates.x;
-    head->map_coordinates.y = tmp.map_coordinates.y;
-    head->is_suspect = tmp.is_suspect;
 }
 
 void odd_even_round_characters(character *head, int turn) {
@@ -184,21 +178,21 @@ void odd_even_round_characters(character *head, int turn) {
 
 void char_info_print(char name[2]) {
     if (!strcmp(name, "SH")) {
-        printf("SH: 1) Move 1 to 3 houses. 2) Knowing the identity of a suspect\n");
+        printf("SH: 1) MOVE 1 TO 3 HOUSES. 2) KNOWING THE IDENTITY OF A SUSPECT\n");
     } else if (!strcmp(name, "JW")) {
-        printf("JW: 1) Move 1 to 3 houses. 2) Give direction to the lantern\n");
+        printf("JW: 1) MOVE 1 TO 3 HOUSES. 2) GIVE DIRECTION TO THE LANTERN\n");
     } else if (!strcmp(name, "JS")) {
-        printf("JS: 1) Move 1 to 3 houses. 2) Move the lights\n");
+        printf("JS: 1) MOVE 1 TO 3 HOUSES. 2) MOVE THE LIGHTS\n");
     } else if (!strcmp(name, "IL")) {
-        printf("IL: 1) Move 1 to 3 houses. 2) Block or open the way out\n");
+        printf("IL: 1) MOVE 1 TO 3 HOUSES. 2) BLOCK OR OPEN A WAY OUT\n");
     } else if (!strcmp(name, "MS")) {
-        printf("MS: 1) Move 1 to 4 houses. 2) She can pass over buildings\n");
+        printf("MS: 1) MOVE 1 TO 4 HOUSES. 2) SHE CAN PASS OVER BUILDINGS\n");
     } else if (!strcmp(name, "SG")) {
-        printf("SG: 1) Move 1 to 3 houses. 2) Bring other characters totally 3 movement closer to him\n");
+        printf("SG: 1) MOVE 1 TO 3 HOUSES. 2) BRING OTHER CHARACTERS TOTALLY 3 MOVEMENT CLOSER TO HIMSELF\n");
     } else if (!strcmp(name, "WG")) {
-        printf("WG: 1) Move 1 to 3 houses or exchange his location with the location of any other character.\n");
+        printf("WG: 1) MOVE 1 TO 3 HOUSES OR EXCHANGE HIS LOCATION WITH THE LOCATION OF ANY OTHER CHARACTER.\n");
     } else if (!strcmp(name, "JB")) {
-        printf("JB: 1) Move 1 to 3 houses. 2)  Opens a manhole and closes another\n");
+        printf("JB: 1) MOVE 1 TO 3 HOUSES. 2)  OPENS A MANHOLE AND CLOSES ANOTHER\n");
     }
 }
 

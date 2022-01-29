@@ -1,12 +1,9 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <characters.h>
 
 void start_game(int row, int column, map map_info[row][column], game_info gameInfo) {
     int round = 0 + gameInfo.round;
     int turn = 0 + gameInfo.turn;
-    character_actions(row, column, round, turn, map_info);
+    character_actions(row, column, map_info, gameInfo);
 }
 
 void initialize_game() {
@@ -32,8 +29,15 @@ void initialize_game() {
             }
             fclose(fp);
             game_info gameInfo;
+            printf("ENTER FIRST PLAYER'S NAME,THE DETECTIVE:\n");
+            fflush(stdin);
+            gets(gameInfo.detective_name);
+            fflush(stdin);
+            printf("ENTER SECOND PLAYER'S NAME, MR JACK:\n");
+            gets(gameInfo.mr_jack_name);
             gameInfo.turn = 1;
             gameInfo.round = 1;
+
             start_game(row, column, map_info, gameInfo);
             break;
         }
@@ -41,9 +45,9 @@ void initialize_game() {
             break;
         }
         case 3: {
-            printf("ENTER MAP SIZE :\nrow:");
+            printf("ENTER MAP SIZE :\nROW:");
             scanf("%d", &row);
-            printf("column:");
+            printf("COLUMN:");
             scanf("%d", &column);
             cfp = fopen("custom_map.txt", "w+");
             fprintf(cfp, "   ");
